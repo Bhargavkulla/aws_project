@@ -1,6 +1,11 @@
 version: 0.2
 
 phases:
+  install:
+    commands:
+      - echo Installing dependencies...
+      - export AWS_SDK_LOAD_CONFIG=1
+
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
@@ -27,24 +32,24 @@ phases:
 
   post_build:
     commands:
+      # Push images
       - echo Pushing cart image...
       - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}
-
+      
       - echo Pushing catalog image...
       - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}
 
+      # Prepare Kubernetes manifests
       - echo Preparing Kubernetes deployment files...
       - mkdir -p k8s-out
 
-      # Update cart deployment manifest
+      # Replace placeholders and copy manifests
       - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}|g" k8s/cart-deployment.yaml > k8s-out/cart-deployment.yaml
-      - cp k8s/cart-service.yaml k8s-out/ || echo "cart-service.yaml not found, skipping."
+      - [ -f k8s/cart-service.yaml ] && cp k8s/cart-service.yaml k8s-out/
 
-      # Update catalog deployment manifest
       - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}|g" k8s/catalog-deployment.yaml > k8s-out/catalog-deployment.yaml
-      - cp k8s/catalog-service.yaml k8s-out/ || echo "catalog-service.yaml not found, skipping."
+      - [ -f k8s/catalog-service.yaml ] && cp k8s/catalog-service.yaml k8s-out/
 
-      # Copy UI manifests (static public image)
       - cp k8s/ui-deployment.yaml k8s-out/
       - cp k8s/ui-service.yaml k8s-out/
 
