@@ -16,14 +16,12 @@ phases:
 
   build:
     commands:
-      # Build cart service image
       - echo Building cart image...
       - cd src/cart
       - docker build -t cart:${IMAGE_TAG} .
       - docker tag cart:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}
       - cd -
 
-      # Build catalog service image
       - echo Building catalog image...
       - cd src/catalog
       - docker build -t catalog:${IMAGE_TAG} .
@@ -32,23 +30,20 @@ phases:
 
   post_build:
     commands:
-      # Push images
       - echo Pushing cart image...
       - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}
-      
+
       - echo Pushing catalog image...
       - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}
 
-      # Prepare Kubernetes manifests
       - echo Preparing Kubernetes deployment files...
       - mkdir -p k8s-out
 
-      # Replace placeholders and copy manifests
       - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}|g" k8s/cart-deployment.yaml > k8s-out/cart-deployment.yaml
-      - [ -f k8s/cart-service.yaml ] && cp k8s/cart-service.yaml k8s-out/
+      - cp k8s/cart-service.yaml k8s-out/ || echo "No cart-service.yaml found"
 
       - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}|g" k8s/catalog-deployment.yaml > k8s-out/catalog-deployment.yaml
-      - [ -f k8s/catalog-service.yaml ] && cp k8s/catalog-service.yaml k8s-out/
+      - cp k8s/catalog-service.yaml k8s-out/ || echo "No catalog-service.yaml found"
 
       - cp k8s/ui-deployment.yaml k8s-out/
       - cp k8s/ui-service.yaml k8s-out/
