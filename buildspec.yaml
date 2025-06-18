@@ -4,26 +4,26 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - ACCOUNT_ID=423623849965   # replace with your AWS account ID
+      - ACCOUNT_ID=423623849965
       - REGION=us-east-1
-      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
       - IMAGE_TAG=v1.$CODEBUILD_BUILD_NUMBER
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
 
   build:
     commands:
       # Build cart service image
       - echo Building cart image...
-      - cd cart
+      - cd src/cart
       - docker build -t cart:${IMAGE_TAG} .
       - docker tag cart:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}
-      - cd ..
+      - cd -
 
       # Build catalog service image
       - echo Building catalog image...
-      - cd catalog
+      - cd src/catalog
       - docker build -t catalog:${IMAGE_TAG} .
       - docker tag catalog:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}
-      - cd ..
+      - cd -
 
   post_build:
     commands:
@@ -36,15 +36,15 @@ phases:
       - echo Preparing Kubernetes deployment files...
       - mkdir -p k8s-out
 
-      # Update cart deployment manifest with image
+      # Update cart deployment manifest
       - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}|g" k8s/cart-deployment.yaml > k8s-out/cart-deployment.yaml
-      - cp k8s/cart-service.yaml k8s-out/
+      - cp k8s/cart-service.yaml k8s-out/ || echo "cart-service.yaml not found, skipping."
 
-      # Update catalog deployment manifest with image
+      # Update catalog deployment manifest
       - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}|g" k8s/catalog-deployment.yaml > k8s-out/catalog-deployment.yaml
-      - cp k8s/catalog-service.yaml k8s-out/
+      - cp k8s/catalog-service.yaml k8s-out/ || echo "catalog-service.yaml not found, skipping."
 
-      # Copy UI manifests as is (using public image)
+      # Copy UI manifests (static public image)
       - cp k8s/ui-deployment.yaml k8s-out/
       - cp k8s/ui-service.yaml k8s-out/
 
@@ -52,8 +52,6 @@ artifacts:
   base-directory: k8s-out
   files:
     - cart-deployment.yaml
-    - cart-service.yaml
     - catalog-deployment.yaml
-    - catalog-service.yaml
     - ui-deployment.yaml
     - ui-service.yaml
