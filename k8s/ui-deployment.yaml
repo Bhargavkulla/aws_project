@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: store-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: store-ui
+  template:
+    metadata:
+      labels:
+        app: store-ui
+    spec:
+      containers:
+      - name: store-ui
+        image: public.ecr.aws/aws-containers/retail-store-sample-ui:1.0.0
+        ports:
+        - containerPort: 8080
