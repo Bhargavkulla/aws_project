@@ -14,18 +14,6 @@ phases:
       - IMAGE_TAG=v1.$CODEBUILD_BUILD_NUMBER
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
 
-      - echo "Detecting current IAM role ARN..."
-      - CALLER_ARN=$(aws sts get-caller-identity --query Arn --output text)
-      - ROLE_ARN=$(echo $CALLER_ARN | sed 's|^arn:aws:sts::|arn:aws:iam::|' | sed 's/:assumed-role/:role/' | cut -d'/' -f1-6)
-      - echo "Registering IAM role $ROLE_ARN to EKS cluster..."
-      - |
-        aws eks create-access-entry \
-          --cluster-name ecommerce-cluster \
-          --region $REGION \
-          --principal-arn "$ROLE_ARN" \
-          --type STANDARD \
-          --access-policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy || echo "Access entry may already exist"
-
   build:
     commands:
       - echo Building cart image...
