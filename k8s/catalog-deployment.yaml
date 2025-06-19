@@ -14,12 +14,12 @@ spec:
     spec:
       containers:
       - name: catalog
-        image: IMAGE_PLACEHOLDER
+        image: 423623849965.dkr.ecr.us-east-1.amazonaws.com/catalog
         ports:
         - containerPort: 8080
         env:
         - name: DB_HOST
-          value: catalog-db.cb6eiuesce5w.us-east-1.rds.amazonaws.com
+          value: retaildb.cb6eiuesce5w.us-east-1.rds.amazonaws.com
         - name: DB_PORT
           value: "3306"
         - name: DB_USER
@@ -27,7 +27,7 @@ spec:
         - name: DB_PASSWORD
           value: admin1234
         - name: DB_NAME
-          value: catalogdb
+          value: retaildb
 ---
 apiVersion: v1
 kind: Service
@@ -37,6 +37,6 @@ spec:
   selector:
     app: catalog
   ports:
-    - port: 80       # exposed port
+    - port: 80       
       targetPort: 8080
   type: LoadBalancer
