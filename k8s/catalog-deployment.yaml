@@ -23,11 +23,12 @@ spec:
         - name: DB_PORT
           value: "3306"
         - name: DB_USER
-          value: admin
+          value: dbadmin              
         - name: DB_PASSWORD
-          value: admin1234
+          value: RetailPass#123       
         - name: DB_NAME
           value: retaildb
+
 ---
 apiVersion: v1
 kind: Service
