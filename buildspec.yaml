@@ -10,7 +10,7 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - ACCOUNT_ID=423623849965
-      - REGION=us-east-1
+      - REGION=$AWS_DEFAULT_REGION
       - IMAGE_TAG=v1.$CODEBUILD_BUILD_NUMBER
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
 
@@ -42,8 +42,8 @@ phases:
       - cp k8s/ui-deployment.yaml k8s-out/
       - cp k8s/ui-service.yaml k8s-out/
 
-      - echo Deploying to EKS...
-      - aws eks update-kubeconfig --region $REGION --name ecommerce-cluster
+      - echo Updating kubeconfig and deploying to EKS in $REGION...
+      - aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
       - kubectl apply -f k8s-out/
 
 artifacts:
