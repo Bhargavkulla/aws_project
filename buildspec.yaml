@@ -5,14 +5,12 @@ phases:
     commands:
       - echo Installing dependencies...
       - export AWS_SDK_LOAD_CONFIG=1
-      # Install AWS CLI v2 if not available
-      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-      - unzip -q awscliv2.zip
-      - sudo ./aws/install
       # Install kubectl
       - curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.27.6/2023-10-02/bin/linux/amd64/kubectl
       - chmod +x ./kubectl
       - sudo mv ./kubectl /usr/local/bin/
+      - echo kubectl version:
+      - kubectl version --client
 
   pre_build:
     commands:
@@ -58,7 +56,8 @@ phases:
       - cp k8s/ui-deployment.yaml k8s-out/
       - cp k8s/ui-service.yaml k8s-out/
 
-      - echo Applying manifests to EKS...
+      - echo Applying Kubernetes manifests to EKS...
+      - ls -l k8s-out/
       - kubectl apply -f k8s-out/
 
 artifacts:
