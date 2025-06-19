@@ -42,6 +42,12 @@ phases:
       - cp k8s/ui-deployment.yaml k8s-out/
       - cp k8s/ui-service.yaml k8s-out/
 
+      - echo Creating Kubernetes namespace if it doesn't exist...
+      - kubectl get namespace retail || kubectl create namespace retail
+
+      - echo Applying manifests to EKS cluster...
+      - kubectl apply -n retail -f k8s-out/
+
 artifacts:
   base-directory: k8s-out
   files:
