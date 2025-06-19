@@ -30,21 +30,15 @@ phases:
 
   post_build:
     commands:
-      - echo Pushing cart image...
+      - echo Pushing Docker images...
       - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}
-
-      - echo Pushing catalog image...
       - docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}
 
-      - echo Preparing Kubernetes deployment files...
+      - echo Preparing Kubernetes manifests with updated images...
       - mkdir -p k8s-out
 
       - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}|g" k8s/cart-deployment.yaml > k8s-out/cart-deployment.yaml
-      - cp k8s/cart-service.yaml k8s-out/ || echo "No cart-service.yaml found"
-
       - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}|g" k8s/catalog-deployment.yaml > k8s-out/catalog-deployment.yaml
-      - cp k8s/catalog-service.yaml k8s-out/ || echo "No catalog-service.yaml found"
-
       - cp k8s/ui-deployment.yaml k8s-out/
       - cp k8s/ui-service.yaml k8s-out/
 
