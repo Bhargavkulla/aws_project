@@ -5,7 +5,6 @@ phases:
     commands:
       - echo Installing dependencies...
       - export AWS_SDK_LOAD_CONFIG=1
-      # Install kubectl
       - curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.27.6/2023-10-02/bin/linux/amd64/kubectl
       - chmod +x ./kubectl
       - sudo mv ./kubectl /usr/local/bin/
@@ -28,13 +27,13 @@ phases:
       - cd src/cart
       - docker build -t cart:${IMAGE_TAG} .
       - docker tag cart:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}
-      - cd -
+      - cd ../..
 
       - echo Building catalog image...
       - cd src/catalog
       - docker build -t catalog:${IMAGE_TAG} .
       - docker tag catalog:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}
-      - cd -
+      - cd ../..
 
   post_build:
     commands:
