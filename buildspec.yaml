@@ -10,8 +10,9 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - ACCOUNT_ID=423623849965
-      - REGION=us-east-1
+      - REGION=us-east-1  # Change this when running in a different region
       - IMAGE_TAG=v1.$CODEBUILD_BUILD_NUMBER
+      - export DB_HOST=catalog-db.cb6eiuesce5w.$REGION.rds.amazonaws.com
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
 
   build:
@@ -39,19 +40,18 @@ phases:
       - echo Preparing Kubernetes deployment files...
       - mkdir -p k8s-out
 
-      - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}|g" k8s/cart-deployment.yaml > k8s-out/cart-deployment.yaml
-      - cp k8s/cart-service.yaml k8s-out/ || echo "No cart-service.yaml found"
+      # Replace placeholders in cart.yaml
+      - sed "s|IMAGE_PLACEHOLDER_CART|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}|g; s|REGION_PLACEHOLDER|${REGION}|g" k8s/cart.yaml > k8s-out/cart.yaml
 
-      - sed "s|IMAGE_PLACEHOLDER|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}|g" k8s/catalog-deployment.yaml > k8s-out/catalog-deployment.yaml
-      - cp k8s/catalog-service.yaml k8s-out/ || echo "No catalog-service.yaml found"
+      # Replace placeholders in catalog.yaml
+      - sed "s|IMAGE_PLACEHOLDER_CATALOG|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}|g; s|DB_HOST_PLACEHOLDER|${DB_HOST}|g" k8s/catalog.yaml > k8s-out/catalog.yaml
 
-      - cp k8s/ui-deployment.yaml k8s-out/
-      - cp k8s/ui-service.yaml k8s-out/
+      # Copy UI file as-is
+      - cp k8s/ui.yaml k8s-out/
 
 artifacts:
   base-directory: k8s-out
   files:
-    - cart-deployment.yaml
-    - catalog-deployment.yaml
-    - ui-deployment.yaml
-    - ui-service.yaml
+    - cart.yaml
+    - catalog.yaml
+    - ui.yaml
