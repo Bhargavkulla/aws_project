@@ -21,7 +21,7 @@ spec:
         - name: AWS_REGION
           value: us-east-1
         - name: DYNAMODB_TABLE
-          value: CartTable
+          value: cart
 ---
 apiVersion: v1
 kind: Service
