@@ -14,12 +14,12 @@ spec:
     spec:
       containers:
       - name: catalog
-        image: 423623849965.dkr.ecr.us-east-1.amazonaws.com/catalog:v1.10
+        image: IMAGE_PLACEHOLDER_CATALOG
         ports:
         - containerPort: 8080
         env:
         - name: DB_HOST
-          value: catalog-db.cb6eiuesce5w.us-east-1.rds.amazonaws.com
+          value: DB_HOST_PLACEHOLDER
         - name: DB_PORT
           value: "3306"
         - name: DB_USER
@@ -28,7 +28,6 @@ spec:
           value: admin1234       
         - name: DB_NAME
           value: catalog-db
-
 ---
 apiVersion: v1
 kind: Service
