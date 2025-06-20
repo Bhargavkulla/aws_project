@@ -19,15 +19,15 @@ spec:
         - containerPort: 8080
         env:
         - name: DB_HOST
-          value: retaildb.cb6eiuesce5w.us-east-1.rds.amazonaws.com
+          value: catalog-db.cb6eiuesce5w.us-east-1.rds.amazonaws.com
         - name: DB_PORT
           value: "3306"
         - name: DB_USER
-          value: dbadmin              
+          value: admin              
         - name: DB_PASSWORD
-          value: RetailPass#123       
+          value: admin1234       
         - name: DB_NAME
-          value: retaildb
+          value: catalog-db
 
 ---
 apiVersion: v1
