@@ -18,16 +18,16 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        - name: DB_HOST
-          value: catalog-db.cb6eiuesce5w.us-east-1.rds.amazonaws.com
-        - name: DB_PORT
-          value: "3306"
-        - name: DB_USER
-          value: admin              
-        - name: DB_PASSWORD
-          value: admin1234       
-        - name: DB_NAME
+        - name: RETAIL_CATALOG_PERSISTENCE_PROVIDER
+          value: mysql
+        - name: RETAIL_CATALOG_PERSISTENCE_ENDPOINT
+          value: catalog-db.cb6eiuesce5w.us-east-1.rds.amazonaws.com:3306
+        - name: RETAIL_CATALOG_PERSISTENCE_DB_NAME
           value: catalog-db
+        - name: RETAIL_CATALOG_PERSISTENCE_USER
+          value: admin
+        - name: RETAIL_CATALOG_PERSISTENCE_PASSWORD
+          value: admin1234
 
 ---
 apiVersion: v1
