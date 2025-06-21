@@ -23,7 +23,7 @@ spec:
         - name: RETAIL_CATALOG_PERSISTENCE_ENDPOINT
           value: catalog-db.cb6eiuesce5w.us-east-1.rds.amazonaws.com:3306
         - name: RETAIL_CATALOG_PERSISTENCE_DB_NAME
-          value: catalog-db
+          value: catalogdb 
         - name: RETAIL_CATALOG_PERSISTENCE_USER
           value: admin
         - name: RETAIL_CATALOG_PERSISTENCE_PASSWORD
