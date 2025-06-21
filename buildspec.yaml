@@ -5,8 +5,7 @@ phases:
     commands:
       - echo Installing dependencies...
       - export AWS_SDK_LOAD_CONFIG=1
-      - REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)
-      - echo "Detected region: $REGION"
+      - export REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region) && echo "Detected region: $REGION"
 
   pre_build:
     commands:
@@ -44,7 +43,7 @@ phases:
       # Replace placeholders in cart.yaml
       - sed "s|IMAGE_PLACEHOLDER_CART|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}|g" k8s/cart.yaml > k8s-out/cart.yaml
 
-      # Replace placeholders in catalog.yaml (RDS_ENDPOINT_REPLACE)
+      # Replace placeholders in catalog.yaml
       - sed "s|IMAGE_PLACEHOLDER_CATALOG|${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}|g; s|RDS_ENDPOINT_REPLACE|${DB_HOST}|g" k8s/catalog.yaml > k8s-out/catalog.yaml
 
       # Copy UI file as-is
