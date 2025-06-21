@@ -21,7 +21,7 @@ spec:
         - name: RETAIL_CATALOG_PERSISTENCE_PROVIDER
           value: mysql
         - name: RETAIL_CATALOG_PERSISTENCE_ENDPOINT
-          value: catalog-db.cb6eiuesce5w.us-east-1.rds.amazonaws.com:3306
+          value: RDS_ENDPOINT_REPLACE
         - name: RETAIL_CATALOG_PERSISTENCE_DB_NAME
           value: catalogdb 
         - name: RETAIL_CATALOG_PERSISTENCE_USER
