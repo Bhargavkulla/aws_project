@@ -18,25 +18,15 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        - name: DB_HOST
-          value: DB_HOST_PLACEHOLDER
-        - name: DB_PORT
-          value: "3306"
-        - name: DB_USER
-          value: admin              
-        - name: DB_PASSWORD
-          value: admin1234       
-        - name: DB_NAME
-          value: catalog-db
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: catalog-svc
-spec:
-  selector:
-    app: catalog
-  ports:
-    - port: 80       
-      targetPort: 8080
-  type: LoadBalancer
+        - name: DATABASE_TYPE
+          value: mysql
+        - name: DATABASE_ENDPOINT
+          value: catalog-db.cb6eiuesce5w.us-east-1.rds.amazonaws.com
+        - name: DATABASE_USER
+          value: admin
+        - name: DATABASE_PASSWORD
+          value: admin1234
+        - name: DATABASE_NAME
+          value: catalogdb
+        - name: DATABASE_CONNECT_TIMEOUT
+          value: "10"
