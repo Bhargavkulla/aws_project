@@ -1,0 +1,59 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Installing dependencies...
+      - export AWS_SDK_LOAD_CONFIG=1
+
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - ACCOUNT_ID=423623849965
+      - REGION=us-west-1
+      - IMAGE_TAG=v1.$CODEBUILD_BUILD_NUMBER
+      - export DB_HOST=catalog-db.ctsamiyy83q5.us-west-1.rds.amazonaws.com
+      - export CATALOG_IMAGE=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/catalog:${IMAGE_TAG}
+      - export CART_IMAGE=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/cart:${IMAGE_TAG}
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
+
+  build:
+    commands:
+      - echo Building cart image...
+      - cd src/cart
+      - docker build -t cart:${IMAGE_TAG} .
+      - docker tag cart:${IMAGE_TAG} $CART_IMAGE
+      - cd ../..
+
+      - echo Building catalog image...
+      - cd src/catalog
+      - docker build -t catalog:${IMAGE_TAG} .
+      - docker tag catalog:${IMAGE_TAG} $CATALOG_IMAGE
+      - cd ../..
+
+  post_build:
+    commands:
+      - echo Pushing cart image...
+      - docker push $CART_IMAGE
+
+      - echo Pushing catalog image...
+      - docker push $CATALOG_IMAGE
+
+      - echo Preparing Kubernetes deployment files...
+      - mkdir -p k8s-out
+
+      # Replace placeholders in cart.yaml
+      - sed "s|IMAGE_PLACEHOLDER_CART|$CART_IMAGE|g" k8s/cart.yaml > k8s-out/cart.yaml
+
+      # Replace placeholders in catalog.yaml
+      - sed "s|IMAGE_PLACEHOLDER_CATALOG|$CATALOG_IMAGE|g; s|RDS_ENDPOINT_REPLACE|$DB_HOST|g" k8s/catalog.yaml > k8s-out/catalog.yaml
+
+      # Copy UI file as-is
+      - cp k8s/ui.yaml k8s-out/
+
+artifacts:
+  base-directory: k8s-out
+  files:
+    - cart.yaml
+    - catalog.yaml
+    - ui.yaml
