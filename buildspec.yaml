@@ -4,17 +4,19 @@ phases:
   install:
     commands:
       - echo Installing dependencies...
-      - |
-        export AWS_SDK_LOAD_CONFIG=1
-        export REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)
-        echo "Detected region: $REGION"
+      - export AWS_SDK_LOAD_CONFIG=1
+      - REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)
+      - echo "Detected region: $REGION"
+      - echo "REGION=$REGION" >> ~/.bashrc
 
   pre_build:
     commands:
+      - source ~/.bashrc
       - echo Logging in to Amazon ECR...
       - ACCOUNT_ID=423623849965
       - IMAGE_TAG=v1.$CODEBUILD_BUILD_NUMBER
       - export DB_HOST=catalog-db.cb6eiuesce5w.$REGION.rds.amazonaws.com
+      - echo "Using region $REGION and DB host $DB_HOST"
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
 
   build:
