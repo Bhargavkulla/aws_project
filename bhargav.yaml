@@ -1,16 +1,16 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Unified EKS Infrastructure + CI/CD with CodePipeline and CloudWatch
+Description: Unified EKS Infrastructure + CI/CD with CodePipeline and CloudWatch (StackSet Compatible)
 
 Parameters:
   GitHubRepo:
     Type: String
-    Description: https://github.com/Bhargavkulla/aws_project_info.git
+    Default: Bhargavkulla/aws_project
   GitHubBranch:
     Type: String
     Default: main
-  GitHubConnectionArn: 
+  GitHubConnectionArn:
     Type: String
-    Description: arn:aws:codeconnections:us-east-1:423623849965:connection/02334dff-a54b-4fe3-9edb-86c42cd8e12e
+    Default: arn:aws:codeconnections:us-east-1:423623849965:connection/02334dff-a54b-4fe3-9edb-86c42cd8e12e
   DBUsername:
     Type: String
     Default: admin
@@ -33,6 +33,9 @@ Parameters:
   PrivateSubnet2Cidr:
     Type: String
     Default: 10.0.4.0/24
+
+Metadata:
+  StackSetCompatible: true
 
 Resources:
 
@@ -144,6 +147,22 @@ Resources:
       SubnetId: !Ref PrivateSubnet2
       RouteTableId: !Ref PrivateRouteTable
 
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "eks-ci-artifacts-${AWS::AccountId}-${AWS::Region}"
+    DeletionPolicy: Delete
+
+  ECRCatalog:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: catalog
+
+  ECRCart:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: cart
+
   EKSClusterRole:
     Type: AWS::IAM::Role
     Properties:
@@ -174,6 +193,7 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
         - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+
   SecurityGroupEKSNodes:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -261,11 +281,6 @@ Resources:
       AmiType: AL2_x86_64
       RemoteAccess:
         Ec2SshKey: bhargav1
-  ArtifactBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "eks-ci-artifacts-${AWS::AccountId}-${AWS::Region}"
-    DeletionPolicy: Delete
 
   CodeBuildRole:
     Type: AWS::IAM::Role
@@ -287,9 +302,16 @@ Resources:
                 Action:
                   - ecr:*
                   - eks:DescribeCluster
+                  - eks:UpdateClusterConfig
+                  - eks:Describe*
+                  - eks:List*
                   - logs:*
                   - s3:*
                   - cloudwatch:*
+                  - sts:GetCallerIdentity
+                  - iam:PassRole
+                  - ec2:Describe*
+                  - ec2:Get*
                 Resource: "*"
 
   CodeBuildProject:
@@ -308,6 +330,8 @@ Resources:
         EnvironmentVariables:
           - Name: AWS_REGION
             Value: !Ref AWS::Region
+          - Name: CLUSTER_NAME
+            Value: ecommerce-cluster
       ServiceRole: !GetAtt CodeBuildRole.Arn
 
   CodePipelineRole:
@@ -359,9 +383,9 @@ Resources:
                 FullRepositoryId: !Ref GitHubRepo
                 BranchName: !Ref GitHubBranch
                 DetectChanges: true
-        - Name: Build
+        - Name: Deploy
           Actions:
-            - Name: Docker_Build_And_Deploy
+            - Name: BuildPushDeploy
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -373,7 +397,9 @@ Resources:
                 - Name: BuildOutput
               Configuration:
                 ProjectName: !Ref CodeBuildProject
+
 Outputs:
+
   EKSClusterName:
     Description: Name of the EKS Cluster
     Value: !Ref EKSCluster
@@ -393,3 +419,11 @@ Outputs:
   ArtifactBucket:
     Description: S3 Bucket used for storing pipeline artifacts
     Value: !Ref ArtifactBucket
+
+  CartECRRepo:
+    Description: ECR Repo for Cart Service
+    Value: !Ref ECRCart
+
+  CatalogECRRepo:
+    Description: ECR Repo for Catalog Service
+    Value: !Ref ECRCatalog
