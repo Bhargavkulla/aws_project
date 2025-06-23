@@ -24,7 +24,7 @@ phases:
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
 
       - echo Running SonarQube analysis...
-      - sonar-scanner -Dsonar.projectKey=project -Dsonar.sources=. -Dsonar.host.url=http://54.234.52.40 -Dsonar.login=sqp_78d0353f8ebbe463051fb078d426932df67e7ceb
+      - sonar-scanner -Dsonar.projectKey=project -Dsonar.sources=. -Dsonar.java.binaries=src -Dsonar.host.url=http://54.234.52.40 -Dsonar.login=sqp_78d0353f8ebbe463051fb078d426932df67e7ceb
 
   build:
     commands:
