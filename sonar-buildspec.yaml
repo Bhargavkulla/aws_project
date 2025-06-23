@@ -6,6 +6,12 @@ phases:
       - echo Installing dependencies...
       - export AWS_SDK_LOAD_CONFIG=1
 
+      - echo Installing SonarScanner...
+      - curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+      - unzip sonar-scanner.zip
+      - mv sonar-scanner-* sonar-scanner
+      - export PATH=$PATH:$(pwd)/sonar-scanner/bin
+
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
